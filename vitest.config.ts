@@ -15,6 +15,14 @@ export default defineConfig({
     }
   },
   test: {
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest}.config.*',
+      'e2e/**'
+    ],
     projects: [{
       extends: true,
       test: {

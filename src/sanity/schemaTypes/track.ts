@@ -41,6 +41,12 @@ export const track = defineType({
       description: 'Used if you prefer to embed from SoundCloud.',
     }),
     defineField({
+      name: 'youtubeUrl',
+      title: 'YouTube URL (Fallback)',
+      type: 'url',
+      description: 'Used if you prefer to embed a YouTube video/soundtrack.',
+    }),
+    defineField({
       name: 'coverImage',
       title: 'Track Artwork (Optional)',
       type: 'image',

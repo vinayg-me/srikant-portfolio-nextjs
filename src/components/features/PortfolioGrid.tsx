@@ -67,54 +67,62 @@ export const PortfolioGrid = ({ projects }: PortfolioGridProps) => {
           {filteredProjects.map((project) => {
             const imageUrl = project.coverImage ? urlFor(project.coverImage).width(500).url() : null
 
+            const displayFilter = project.filterCategory === 'programmer'
+              ? 'Producer / Programmer'
+              : project.filterCategory.charAt(0).toUpperCase() + project.filterCategory.slice(1)
+
             return (
               <div
                 key={project._id}
-                className="group relative overflow-hidden rounded-2xl glass-panel aspect-[2/3] flex flex-col justify-end"
+                className="group relative overflow-hidden rounded-2xl bg-neutral-950 border border-neutral-900/60 aspect-[2/3] flex flex-col justify-end transition-all duration-500 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.08)]"
               >
+                {/* Floating category badge */}
+                <div className="absolute top-4 left-4 z-20">
+                  <span className="text-[9px] uppercase tracking-widest font-semibold text-teal-300 px-2.5 py-1 bg-black/60 backdrop-blur-md border border-teal-500/30 rounded-full">
+                    {displayFilter}
+                  </span>
+                </div>
+
                 {/* Image layer */}
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={project.title}
                     loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110 group-hover:brightness-50 brightness-[0.85]"
+                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 group-hover:brightness-50 brightness-[0.75]"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900 to-neutral-950" />
                 )}
 
                 {/* Hover overlay gradient */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-60 group-hover:opacity-85 transition-opacity duration-300" />
+                <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-950/40 to-transparent opacity-80 group-hover:opacity-90 transition-opacity duration-500" />
 
                 {/* Card details */}
-                <div className="relative p-5 space-y-2 z-10 transition-all duration-300 group-hover:translate-y-[-5px]">
-                  <span className="text-[10px] uppercase tracking-wider font-semibold text-teal px-2 py-0.5 bg-teal/10 border border-teal/20 rounded-md">
-                    {project.filterCategory}
-                  </span>
-                  <h3 className="font-serif text-xl font-bold leading-tight text-white group-hover:text-gold transition-colors duration-300">
-                    {project.title}
-                  </h3>
-                  <p className="text-xs text-neutral-400 line-clamp-1">
-                    {project.category}
-                  </p>
+                <div className="relative p-6 space-y-2.5 z-10 transition-all duration-500 group-hover:translate-y-[-4px]">
                   {project.releaseYear && (
-                    <span className="text-[10px] text-neutral-500 block">
+                    <span className="text-[10px] text-gold/60 uppercase tracking-widest font-medium block">
                       Released: {project.releaseYear}
                     </span>
                   )}
+                  <h3 className="font-serif text-lg md:text-xl font-bold leading-tight text-white group-hover:text-gold transition-colors duration-300">
+                    {project.title}
+                  </h3>
+                  <p className="text-xs text-neutral-400 font-sans leading-relaxed line-clamp-2">
+                    {project.category}
+                  </p>
 
-                  {/* IMDB button */}
+                  {/* IMDB button / Link */}
                   {project.imdbLink && (
                     <a
                       href={project.imdbLink}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="mt-3 flex items-center justify-center gap-1.5 w-full py-2 rounded-lg bg-neutral-900/80 hover:bg-gold hover:text-black border border-neutral-800 text-neutral-300 text-xs font-semibold transition-all duration-300"
+                      className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-teal hover:text-gold transition-colors duration-300 pt-2"
                     >
                       <Film className="w-3.5 h-3.5" />
                       View Credits
-                      <ExternalLink className="w-3 h-3" />
+                      <ExternalLink className="w-3 h-3 opacity-60" />
                     </a>
                   )}
                 </div>

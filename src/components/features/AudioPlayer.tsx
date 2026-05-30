@@ -9,6 +9,7 @@ interface Track {
   title: string
   category: string
   soundcloudUrl?: string
+  youtubeUrl?: string
   audioUrl?: string
   description?: string
 }
@@ -18,6 +19,29 @@ interface AudioPlayerProps {
 }
 
 const FALLBACK_AUDIO = 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3'
+
+const getSoundCloudEmbedUrl = (url?: string) => {
+  if (!url) return ''
+  if (url.includes('w.soundcloud.com/player/')) {
+    return url
+  }
+  return `https://w.soundcloud.com/player/?url=${encodeURIComponent(url)}&color=%2300f0ff&auto_play=false&hide_related=true&show_comments=false&show_user=true&show_reposts=false&show_teaser=false&visual=true`
+}
+
+const getYoutubeEmbedUrl = (url?: string) => {
+  if (!url) return ''
+  if (url.includes('youtube.com/embed/')) {
+    return url
+  }
+  let videoId = ''
+  if (url.includes('youtube.com/watch')) {
+    const urlParams = new URLSearchParams(url.split('?')[1] || '')
+    videoId = urlParams.get('v') || ''
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+  }
+  return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0` : ''
+}
 
 export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
@@ -31,20 +55,36 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
   const progressBarRef = useRef<HTMLDivElement | null>(null)
 
   const currentTrack = tracks[currentTrackIndex]
-  const audioSource = currentTrack?.audioUrl || FALLBACK_AUDIO
+
+  const rawSoundCloud = currentTrack?.soundcloudUrl || ''
+  const rawYoutube = currentTrack?.youtubeUrl || ''
+
+  const isActualYoutube = rawYoutube.includes('youtube.com') || rawYoutube.includes('youtu.be') || rawSoundCloud.includes('youtube.com') || rawSoundCloud.includes('youtu.be')
+  const isActualSoundCloud = rawSoundCloud.includes('soundcloud.com') && !isActualYoutube
+
+  const hasDirectAudio = !!currentTrack?.audioUrl
+  const hasSoundCloud = isActualSoundCloud
+  const hasYoutube = isActualYoutube
+
+  const soundCloudUrl = rawSoundCloud
+  const youtubeUrl = rawYoutube.includes('youtube.com') || rawYoutube.includes('youtu.be') ? rawYoutube : rawSoundCloud
+
+  const audioSource = currentTrack?.audioUrl || (!hasSoundCloud && !hasYoutube ? FALLBACK_AUDIO : '')
 
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.load()
-      if (isPlaying) {
+      if (isPlaying && hasDirectAudio) {
         audioRef.current.play().catch(() => setIsPlaying(false))
+      } else {
+        setIsPlaying(false)
       }
     }
-  }, [currentTrackIndex])
+  }, [currentTrackIndex, hasDirectAudio])
 
   const handlePlayPause = () => {
-    if (!audioRef.current) return
+    if (!audioRef.current || !hasDirectAudio) return
     if (isPlaying) {
       audioRef.current.pause()
       setIsPlaying(false)
@@ -189,95 +229,172 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
               "{currentTrack.description}"
             </p>
           )}
-          {!currentTrack?.audioUrl && (
-            <span className="text-[9px] text-yellow-500/80 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-md inline-block mt-2 font-medium">
+          {!hasDirectAudio && !hasSoundCloud && !hasYoutube && (
+            <span className="text-[9px] text-yellow-500/80 bg-yellow-500/10 border border-yellow-500/20 px-2 py-0.5 rounded-md inline-block mt-2 font-medium font-sans">
               Demo Preview (No custom file uploaded yet)
+            </span>
+          )}
+          {hasSoundCloud && !hasDirectAudio && (
+            <span className="text-[9px] text-teal-400 bg-teal-400/10 border border-teal-400/20 px-2 py-0.5 rounded-md inline-block mt-2 font-semibold font-sans uppercase tracking-widest">
+              SoundCloud Stream
+            </span>
+          )}
+          {hasYoutube && !hasDirectAudio && (
+            <span className="text-[9px] text-red-400 bg-red-400/10 border border-red-400/20 px-2 py-0.5 rounded-md inline-block mt-2 font-semibold font-sans uppercase tracking-widest">
+              YouTube Video
             </span>
           )}
         </div>
 
-        <div className="h-16 flex items-end justify-center gap-1.5 bg-neutral-900/30 border border-neutral-950 rounded-xl p-4 overflow-hidden relative">
-          {Array.from({ length: 32 }).map((_, idx) => {
-            const h = 20 + Math.sin(idx) * 15 + Math.random() * 20
-            return (
+        {hasDirectAudio || (!hasSoundCloud && !hasYoutube) ? (
+          <>
+            <div className="h-16 flex items-end justify-center gap-1.5 bg-neutral-900/30 border border-neutral-950 rounded-xl p-4 overflow-hidden relative">
+              {Array.from({ length: 32 }).map((_, idx) => {
+                const h = 20 + Math.sin(idx) * 15 + Math.random() * 20
+                return (
+                  <div
+                    key={idx}
+                    className={cn(
+                      "w-1 rounded-t-full bg-gradient-to-t from-teal to-teal/40 min-h-[4px]",
+                      isPlaying ? "wave-bar" : "opacity-30"
+                    )}
+                    style={{
+                      height: `${h}%`,
+                      animationDelay: `${idx * 0.03}s`,
+                      animationDuration: `${0.8 + Math.random() * 0.6}s`
+                    }}
+                  />
+                )
+              })}
+            </div>
+
+            <div className="space-y-2">
               <div
-                key={idx}
-                className={cn(
-                  "w-1 rounded-t-full bg-gradient-to-t from-teal to-teal/40 min-h-[4px]",
-                  isPlaying ? "wave-bar" : "opacity-30"
-                )}
-                style={{
-                  height: `${h}%`,
-                  animationDelay: `${idx * 0.03}s`,
-                  animationDuration: `${0.8 + Math.random() * 0.6}s`
-                }}
+                ref={progressBarRef}
+                onClick={handleSeek}
+                className="w-full h-1.5 bg-neutral-800 rounded-full cursor-pointer overflow-hidden relative group"
+              >
+                <div
+                  className="h-full bg-teal absolute left-0 top-0 group-hover:bg-gold transition-colors duration-200"
+                  style={{ width: `${activeProgressPercent}%` }}
+                />
+              </div>
+
+              <div className="flex justify-between text-xs text-neutral-500">
+                <span>{formatTime(currentTime)}</span>
+                <span>{formatTime(duration)}</span>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                <button
+                  onClick={handlePrevTrack}
+                  className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
+                >
+                  <SkipBack className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handlePlayPause}
+                  className="w-12 h-12 rounded-full bg-teal text-background flex items-center justify-center hover:scale-105 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all cursor-pointer"
+                >
+                  {isPlaying ? (
+                    <Pause className="w-5 h-5 fill-current" />
+                  ) : (
+                    <Play className="w-5 h-5 fill-current translate-x-0.5" />
+                  )}
+                </button>
+                <button
+                  onClick={handleNextTrack}
+                  className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
+                >
+                  <SkipForward className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleToggleMute}
+                  className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
+                >
+                  {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+                </button>
+                <input
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.01"
+                  value={isMuted ? 0 : volume}
+                  onChange={handleVolumeChange}
+                  className="w-20 h-1 bg-neutral-800 accent-teal rounded-lg cursor-pointer outline-none"
+                />
+              </div>
+            </div>
+          </>
+        ) : hasSoundCloud ? (
+          <div className="space-y-4">
+            <div className="w-full rounded-xl overflow-hidden border border-neutral-800/60 bg-black/40 shadow-inner">
+              <iframe
+                width="100%"
+                height="166"
+                scrolling="no"
+                frameBorder="no"
+                allow="autoplay"
+                src={getSoundCloudEmbedUrl(soundCloudUrl)}
+                className="opacity-90 hover:opacity-100 transition-opacity duration-300"
               />
-            )
-          })}
-        </div>
-
-        <div className="space-y-2">
-          <div
-            ref={progressBarRef}
-            onClick={handleSeek}
-            className="w-full h-1.5 bg-neutral-800 rounded-full cursor-pointer overflow-hidden relative group"
-          >
-            <div
-              className="h-full bg-teal absolute left-0 top-0 group-hover:bg-gold transition-colors duration-200"
-              style={{ width: `${activeProgressPercent}%` }}
-            />
+            </div>
+            <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 px-1">
+              <span>Use SoundCloud controls for playback</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrevTrack}
+                  className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-md hover:text-white transition cursor-pointer"
+                >
+                  Prev Track
+                </button>
+                <button
+                  onClick={handleNextTrack}
+                  className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-md hover:text-white transition cursor-pointer"
+                >
+                  Next Track
+                </button>
+              </div>
+            </div>
           </div>
-
-          <div className="flex justify-between text-xs text-neutral-500">
-            <span>{formatTime(currentTime)}</span>
-            <span>{formatTime(duration)}</span>
+        ) : (
+          <div className="space-y-4">
+            <div className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800/60 bg-black shadow-lg">
+              <iframe
+                width="100%"
+                height="100%"
+                src={getYoutubeEmbedUrl(youtubeUrl)}
+                title={currentTrack.title}
+                frameBorder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+            <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 px-1">
+              <span>Use YouTube controls for playback</span>
+              <div className="flex gap-2">
+                <button
+                  onClick={handlePrevTrack}
+                  className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-md hover:text-white transition cursor-pointer"
+                >
+                  Prev Track
+                </button>
+                <button
+                  onClick={handleNextTrack}
+                  className="px-3 py-1 bg-neutral-900 border border-neutral-800 rounded-md hover:text-white transition cursor-pointer"
+                >
+                  Next Track
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={handlePrevTrack}
-              className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
-            >
-              <SkipBack className="w-5 h-5" />
-            </button>
-            <button
-              onClick={handlePlayPause}
-              className="w-12 h-12 rounded-full bg-teal text-background flex items-center justify-center hover:scale-105 shadow-[0_0_15px_rgba(0,240,255,0.25)] transition-all cursor-pointer"
-            >
-              {isPlaying ? (
-                <Pause className="w-5 h-5 fill-current" />
-              ) : (
-                <Play className="w-5 h-5 fill-current translate-x-0.5" />
-              )}
-            </button>
-            <button
-              onClick={handleNextTrack}
-              className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
-            >
-              <SkipForward className="w-5 h-5" />
-            </button>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <button
-              onClick={handleToggleMute}
-              className="p-2 text-neutral-400 hover:text-white transition cursor-pointer"
-            >
-              {isMuted ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </button>
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={isMuted ? 0 : volume}
-              onChange={handleVolumeChange}
-              className="w-20 h-1 bg-neutral-800 accent-teal rounded-lg cursor-pointer outline-none"
-            />
-          </div>
-        </div>
+        )}
       </div>
     </div>
   )

@@ -41,8 +41,15 @@ export default async function Home() {
       {/* Header / Navigation bar */}
       <header className="sticky top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900/60">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <a href="#" className="font-serif text-xl md:text-2xl font-bold tracking-wider text-white">
-            SRIKANT <span className="text-gold">KRISHNA</span>
+          <a href="#" className="flex items-center gap-3 font-serif text-xl md:text-2xl font-bold tracking-wider text-white group">
+            <img
+              src="/Srikant-Logo.jpg"
+              alt="Srikant Krishna Logo"
+              className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-lg border border-neutral-800 bg-neutral-900/50 p-0.5 group-hover:border-gold/50 transition-colors duration-300"
+            />
+            <span className="leading-none select-none">
+              SRIKANT <span className="text-gold">KRISHNA</span>
+            </span>
           </a>
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
             <a href="#about" className="hover:text-gold transition">Bio</a>
@@ -268,25 +275,38 @@ export default async function Home() {
               const avatarUrl = t.avatar ? urlFor(t.avatar).width(120).url() : null
 
               return (
-                <div key={t._id} className="p-8 rounded-2xl glass-panel space-y-6 flex flex-col justify-between border border-neutral-900">
-                  <p className="text-neutral-300 text-xs italic leading-relaxed">
-                    "{t.quote}"
-                  </p>
-                  <div className="flex items-center gap-3">
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={t.author}
-                        className="w-10 h-10 rounded-full object-cover border border-neutral-800"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 rounded-full bg-neutral-800 flex items-center justify-center text-xs">
-                        {t.author[0]}
+                <div 
+                  key={t._id} 
+                  className="relative p-8 rounded-2xl bg-neutral-950/40 backdrop-blur-md border border-neutral-900/80 hover:border-gold/30 hover:shadow-[0_0_30px_rgba(212,175,55,0.05)] transition-all duration-500 group flex flex-col justify-between overflow-hidden"
+                >
+                  {/* Classy decorative quote mark */}
+                  <span className="font-serif text-7xl text-gold/15 absolute top-2 left-4 pointer-events-none select-none">“</span>
+                  
+                  <div className="relative z-10 space-y-6 pt-4">
+                    <p className="text-neutral-200 text-sm italic font-serif font-light leading-relaxed tracking-wide">
+                      "{t.quote}"
+                    </p>
+                    
+                    <div className="flex items-center gap-3.5 pt-4 border-t border-neutral-900/60">
+                      {avatarUrl ? (
+                        <img
+                          src={avatarUrl}
+                          alt={t.author}
+                          className="w-11 h-11 rounded-full object-cover border border-neutral-800 group-hover:border-gold/50 transition-colors duration-500"
+                        />
+                      ) : (
+                        <div className="w-11 h-11 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs text-neutral-400 group-hover:border-gold/50 transition-colors duration-500">
+                          {t.author[0]}
+                        </div>
+                      )}
+                      <div>
+                        <h4 className="font-serif text-sm font-bold text-white tracking-wide group-hover:text-gold transition-colors duration-500">
+                          {t.author}
+                        </h4>
+                        <p className="text-[10px] text-teal/80 mt-0.5 uppercase tracking-widest font-semibold">
+                          {t.role}
+                        </p>
                       </div>
-                    )}
-                    <div>
-                      <h4 className="font-serif text-sm font-bold text-white">{t.author}</h4>
-                      <p className="text-[10px] text-teal mt-0.5 uppercase tracking-wider">{t.role}</p>
                     </div>
                   </div>
                 </div>

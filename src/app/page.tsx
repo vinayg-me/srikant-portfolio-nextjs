@@ -408,6 +408,35 @@ export default async function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Structured Schema Markup for SEO */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "MusicComposer",
+            "name": "Srikant Krishna",
+            "description": activeProfile.headline || "Music Composer, Producer & Orchestrator",
+            "url": "https://srikantkrishna.com",
+            "image": profileImageUrl,
+            "sameAs": [
+              "https://linkedin.com/in/srikant-krishna"
+            ],
+            "knowsAbout": [
+              "Music Composition",
+              "Orchestration",
+              "Music Production",
+              "Film Scoring",
+              "Game Scoring"
+            ],
+            "nationality": {
+              "@type": "Country",
+              "name": "India"
+            }
+          })
+        }}
+      />
     </div>
   )
 }

@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { urlFor } from '@/sanity/image'
 import { cn } from '@/lib/utils'
 import { ExternalLink, Film } from 'lucide-react'
+import Image from 'next/image'
 
 interface Project {
   _id: string
@@ -85,11 +86,12 @@ export const PortfolioGrid = ({ projects }: PortfolioGridProps) => {
 
                 {/* Image layer */}
                 {imageUrl ? (
-                  <img
+                  <Image
                     src={imageUrl}
-                    alt={project.title}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 group-hover:brightness-50 brightness-[0.75]"
+                    alt={`${project.title} Project Cover`}
+                    fill
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                    className="object-cover transition-transform duration-700 ease-out group-hover:scale-105 group-hover:brightness-50 brightness-[0.75]"
                   />
                 ) : (
                   <div className="absolute inset-0 bg-gradient-to-t from-neutral-950 via-neutral-900 to-neutral-950" />

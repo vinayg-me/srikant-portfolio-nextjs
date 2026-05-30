@@ -6,6 +6,7 @@ import { AudioPlayer } from '@/components/features/AudioPlayer'
 import { AboutTabs } from '@/components/features/AboutTabs'
 import { ContactForm } from '@/components/features/ContactForm'
 import { Music, Mail, MapPin, Film, Award, Play, ChevronRight, User } from 'lucide-react'
+import Image from 'next/image'
 
 // Prevent caching during static builds to fetch live CMS content on request
 export const revalidate = 60
@@ -42,9 +43,11 @@ export default async function Home() {
       <header className="sticky top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900/60">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative">
           <a href="#" className="flex items-center gap-2.5 font-serif text-lg md:text-2xl font-bold tracking-wider text-white group">
-            <img
+            <Image
               src="/Srikant-Logo.jpg"
               alt="Srikant Krishna Logo"
+              width={48}
+              height={48}
               className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-lg border border-neutral-800 bg-neutral-900/50 p-0.5 group-hover:border-gold/50 transition-colors duration-300"
             />
             <span className="leading-none select-none hidden min-[460px]:inline">
@@ -132,10 +135,13 @@ export default async function Home() {
           {/* Hero Profile Image */}
           <div className="lg:col-span-5 relative flex justify-center">
             <div className="w-[320px] sm:w-[380px] aspect-[4/5] rounded-3xl overflow-hidden glass-panel border border-neutral-800/80 relative shadow-[0_0_50px_rgba(212,175,55,0.05)]">
-              <img
+              <Image
                 src={profileImageUrl}
-                alt={activeProfile.name}
-                className="w-full h-full object-cover grayscale contrast-125"
+                alt={`${activeProfile.name} - Music Composer & Producer`}
+                fill
+                priority
+                className="object-cover grayscale contrast-125"
+                sizes="(max-width: 640px) 320px, 380px"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-[#070708] via-transparent to-transparent" />
             </div>
@@ -325,9 +331,11 @@ export default async function Home() {
                     
                     <div className="flex items-center gap-3.5 pt-4 border-t border-neutral-900/60">
                       {avatarUrl ? (
-                        <img
+                        <Image
                           src={avatarUrl}
-                          alt={t.author}
+                          alt={`${t.author} - Testimonial Avatar`}
+                          width={44}
+                          height={44}
                           className="w-11 h-11 rounded-full object-cover border border-neutral-800 group-hover:border-gold/50 transition-colors duration-500"
                         />
                       ) : (

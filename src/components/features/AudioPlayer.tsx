@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Play, Pause, SkipForward, SkipBack, Volume2, VolumeX, Music } from 'lucide-react'
 import { cn } from '@/lib/utils'
+import { urlFor } from '@/sanity/image'
 
 interface Track {
   _id: string
@@ -12,6 +13,7 @@ interface Track {
   youtubeUrl?: string
   audioUrl?: string
   description?: string
+  coverImage?: any
 }
 
 interface AudioPlayerProps {
@@ -43,6 +45,25 @@ const getYoutubeEmbedUrl = (url?: string) => {
   return videoId ? `https://www.youtube.com/embed/${videoId}?autoplay=0&rel=0` : ''
 }
 
+const getYoutubeVideoId = (url?: string) => {
+  if (!url) return ''
+  let videoId = ''
+  if (url.includes('youtube.com/embed/')) {
+    videoId = url.split('youtube.com/embed/')[1]?.split('?')[0] || ''
+  } else if (url.includes('youtube.com/watch')) {
+    const urlParams = new URLSearchParams(url.split('?')[1] || '')
+    videoId = urlParams.get('v') || ''
+  } else if (url.includes('youtu.be/')) {
+    videoId = url.split('youtu.be/')[1]?.split('?')[0] || ''
+  }
+  return videoId
+}
+
+const getYoutubeThumbnail = (url?: string) => {
+  const videoId = getYoutubeVideoId(url)
+  return videoId ? `https://img.youtube.com/vi/${videoId}/hqdefault.jpg` : ''
+}
+
 export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
   const [isPlaying, setIsPlaying] = useState(false)
@@ -50,6 +71,7 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
   const [currentTime, setCurrentTime] = useState(0)
   const [volume, setVolume] = useState(0.8)
   const [isMuted, setIsMuted] = useState(false)
+  const [isIframeLoaded, setIsIframeLoaded] = useState(false)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const progressBarRef = useRef<HTMLDivElement | null>(null)
@@ -71,6 +93,12 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
 
   const audioSource = currentTrack?.audioUrl || (!hasSoundCloud && !hasYoutube ? FALLBACK_AUDIO : '')
 
+  const coverUrl = currentTrack?.coverImage
+    ? urlFor(currentTrack.coverImage).width(400).url()
+    : hasYoutube
+    ? getYoutubeThumbnail(youtubeUrl)
+    : ''
+
   useEffect(() => {
     if (audioRef.current) {
       audioRef.current.pause()
@@ -82,6 +110,10 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
       }
     }
   }, [currentTrackIndex, hasDirectAudio])
+
+  useEffect(() => {
+    setIsIframeLoaded(false)
+  }, [currentTrackIndex])
 
   const handlePlayPause = () => {
     if (!audioRef.current || !hasDirectAudio) return
@@ -333,16 +365,80 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
           </>
         ) : hasSoundCloud ? (
           <div className="space-y-4">
-            <div className="w-full rounded-xl overflow-hidden border border-neutral-800/60 bg-black/40 shadow-inner">
-              <iframe
-                width="100%"
-                height="166"
-                scrolling="no"
-                frameBorder="no"
-                allow="autoplay"
-                src={getSoundCloudEmbedUrl(soundCloudUrl)}
-                className="opacity-90 hover:opacity-100 transition-opacity duration-300"
-              />
+            <div 
+              onClick={() => {!isIframeLoaded && setIsIframeLoaded(true)}}
+              className="w-full h-[166px] rounded-xl overflow-hidden border border-neutral-800/80 bg-neutral-950 flex items-center justify-between p-6 relative group cursor-pointer shadow-xl transition-all duration-500 hover:border-gold/30"
+            >
+              {!isIframeLoaded ? (
+                <>
+                  {/* Blurred Background Artwork */}
+                  {coverUrl ? (
+                    <img
+                      src={coverUrl}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover blur-xl opacity-15 scale-110 transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-r from-neutral-950 via-neutral-900 to-neutral-950 opacity-40" />
+                  )}
+
+                  {/* Content container */}
+                  <div className="relative z-10 flex items-center gap-5 w-full">
+                    {/* Cover Art Frame */}
+                    {coverUrl ? (
+                      <div className="w-20 h-20 rounded-lg overflow-hidden border border-neutral-800/60 shadow-lg relative shrink-0">
+                        <img
+                          src={coverUrl}
+                          alt={currentTrack.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-8 h-8 rounded-full bg-gold text-neutral-950 flex items-center justify-center shadow-lg shadow-gold/25">
+                            <Play className="w-3.5 h-3.5 fill-current translate-x-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-xl bg-neutral-900/80 border border-neutral-800/60 flex items-center justify-center text-neutral-400 group-hover:border-gold/30 shrink-0 transition-all duration-300">
+                        <Music className="w-6 h-6 text-gold/80" />
+                      </div>
+                    )}
+
+                    {/* Titles & Details */}
+                    <div className="text-left space-y-1 max-w-[55%] truncate">
+                      <h3 className="text-white font-serif text-base md:text-lg font-bold tracking-wide group-hover:text-gold transition-colors duration-300 truncate">
+                        {currentTrack.title}
+                      </h3>
+                      {currentTrack.description ? (
+                        <p className="text-neutral-400 text-xs line-clamp-2 leading-relaxed whitespace-normal text-left">
+                          {currentTrack.description}
+                        </p>
+                      ) : (
+                        <p className="text-neutral-500 text-[9px] uppercase tracking-widest font-semibold">
+                          Click to Load SoundCloud Player
+                        </p>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Action button */}
+                  <div className="relative z-10 shrink-0 ml-4 hidden sm:block">
+                    <button className="px-4 py-2 bg-neutral-900 border border-neutral-800 group-hover:border-gold group-hover:text-gold text-neutral-300 font-bold uppercase tracking-wider text-[10px] rounded-lg transition-all duration-300">
+                      Load Player
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <iframe
+                  width="100%"
+                  height="166"
+                  scrolling="no"
+                  frameBorder="no"
+                  allow="autoplay"
+                  src={getSoundCloudEmbedUrl(soundCloudUrl)}
+                  className="opacity-90 hover:opacity-100 transition-opacity duration-300 w-full h-full relative z-10"
+                />
+              )}
             </div>
             <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 px-1">
               <span>Use SoundCloud controls for playback</span>
@@ -364,17 +460,83 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
           </div>
         ) : (
           <div className="space-y-4">
-            <div className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800/60 bg-black shadow-lg">
-              <iframe
-                width="100%"
-                height="100%"
-                src={getYoutubeEmbedUrl(youtubeUrl)}
-                title={currentTrack.title}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                allowFullScreen
-                className="w-full h-full"
-              />
+            <div 
+              onClick={() => {!isIframeLoaded && setIsIframeLoaded(true)}}
+              className="w-full aspect-video rounded-xl overflow-hidden border border-neutral-800/80 bg-neutral-950 flex flex-col items-center justify-center relative group cursor-pointer shadow-lg transition-all duration-500 hover:border-gold/30"
+            >
+              {!isIframeLoaded ? (
+                <>
+                  {/* Blurred Background Artwork */}
+                  {coverUrl ? (
+                    <img
+                      src={coverUrl}
+                      alt=""
+                      className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-20 scale-110 transition-transform duration-700 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className="absolute inset-0 bg-gradient-to-tr from-neutral-950 via-neutral-900 to-neutral-950 opacity-40" />
+                  )}
+
+                  {/* Grid pattern overlay */}
+                  <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808005_1px,transparent_1px),linear-gradient(to_bottom,#80808005_1px,transparent_1px)] bg-[size:14px_24px] pointer-events-none" />
+
+                  {/* Content container */}
+                  <div className="relative z-10 flex flex-col items-center text-center p-6 space-y-5">
+                    {/* Album Art Frame */}
+                    {coverUrl ? (
+                      <div className="w-24 h-24 md:w-32 md:h-32 rounded-xl overflow-hidden border border-neutral-800/60 shadow-2xl relative">
+                        <img
+                          src={coverUrl}
+                          alt={currentTrack.title}
+                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                          <div className="w-10 h-10 rounded-full bg-gold text-neutral-950 flex items-center justify-center shadow-lg shadow-gold/25">
+                            <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="w-20 h-20 rounded-2xl bg-neutral-900/80 border border-neutral-800/60 flex items-center justify-center text-neutral-400 group-hover:border-gold/30 transition-all duration-300 group-hover:scale-105 shadow-inner">
+                        <Music className="w-8 h-8 text-gold/80" />
+                      </div>
+                    )}
+
+                    {/* Titles */}
+                    <div className="space-y-1.5 max-w-sm">
+                      <h3 className="text-white font-serif text-base md:text-lg font-bold tracking-wide group-hover:text-gold transition-colors duration-300">
+                        {currentTrack.title}
+                      </h3>
+                      {currentTrack.description ? (
+                        <p className="text-neutral-400 text-xs line-clamp-1 leading-relaxed">
+                          {currentTrack.description}
+                        </p>
+                      ) : (
+                        <p className="text-neutral-500 text-[10px] uppercase tracking-widest font-semibold">
+                          YouTube Video Embed
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Action link */}
+                    <span className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-neutral-400 group-hover:text-gold transition-colors duration-300">
+                      <Play className="w-3 h-3 fill-current" />
+                      Play Video Preview
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <iframe
+                  width="100%"
+                  height="100%"
+                  src={getYoutubeEmbedUrl(youtubeUrl)}
+                  title={currentTrack.title}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="w-full h-full relative z-10"
+                />
+              )}
             </div>
             <div className="flex items-center justify-between text-xs text-neutral-500 pt-2 px-1">
               <span>Use YouTube controls for playback</span>

@@ -66,6 +66,10 @@ export default function RootLayout({
       lang="en"
       className={`${outfit.variable} ${cinzel.variable} h-full antialiased scroll-smooth`}
     >
+      <head>
+        <link rel="preconnect" href="https://cdn.sanity.io" crossOrigin="anonymous" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+      </head>
       <body className="bg-[#070708] text-neutral-100 min-h-full flex flex-col font-sans">
         {children}
       </body>

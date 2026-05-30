@@ -1,24 +1,31 @@
 import { client } from '@/sanity/client'
-import { profileQuery, projectsQuery, tracksQuery, testimonialsQuery } from '@/sanity/queries'
+import { unifiedPortfolioQuery } from '@/sanity/queries'
 import { urlFor } from '@/sanity/image'
-import { PortfolioGrid } from '@/components/features/PortfolioGrid'
-import { AudioPlayer } from '@/components/features/AudioPlayer'
 import { AboutTabs } from '@/components/features/AboutTabs'
-import { ContactForm } from '@/components/features/ContactForm'
 import { Music, Mail, MapPin, Film, Award, Play, ChevronRight, User } from 'lucide-react'
 import Image from 'next/image'
+import dynamic from 'next/dynamic'
 
-// Prevent caching during static builds to fetch live CMS content on request
-export const revalidate = 60
+const PortfolioGrid = dynamic(() => import('@/components/features/PortfolioGrid').then(mod => mod.PortfolioGrid), {
+  loading: () => <div className="h-[400px] w-full bg-neutral-900/20 border border-neutral-900/40 animate-pulse rounded-2xl" />,
+  ssr: true,
+})
+
+const AudioPlayer = dynamic(() => import('@/components/features/AudioPlayer').then(mod => mod.AudioPlayer), {
+  loading: () => <div className="h-[250px] w-full bg-neutral-900/20 border border-neutral-900/40 animate-pulse rounded-2xl" />,
+})
+
+const ContactForm = dynamic(() => import('@/components/features/ContactForm').then(mod => mod.ContactForm), {
+  loading: () => <div className="h-[400px] w-full bg-neutral-900/20 border border-neutral-900/40 animate-pulse rounded-2xl" />,
+})
+
+// Static revalidation window set to 1 hour (3600s) for optimal edge caching performance
+export const revalidate = 3600
 
 export default async function Home() {
-  // Parallel fetch content from Sanity
-  const [profile, projects, tracks, testimonials] = await Promise.all([
-    client.fetch(profileQuery),
-    client.fetch(projectsQuery),
-    client.fetch(tracksQuery),
-    client.fetch(testimonialsQuery),
-  ])
+  // Consolidated fetch from Sanity in a single round-trip
+  const data = await client.fetch(unifiedPortfolioQuery) || {}
+  const { profile, projects = [], tracks = [], testimonials = [] } = data
 
   // Fallback defaults in case CMS is not populated/connected
   const activeProfile = profile || {
@@ -140,6 +147,7 @@ export default async function Home() {
                 alt={`${activeProfile.name} - Music Composer & Producer`}
                 fill
                 priority
+                fetchPriority="high"
                 className="object-cover grayscale contrast-125"
                 sizes="(max-width: 640px) 320px, 380px"
               />

@@ -178,7 +178,18 @@ export default async function Home() {
               <h2 className="font-serif text-4xl font-bold text-white">Srikant Krishna</h2>
             </div>
             <p className="text-neutral-400 text-sm leading-relaxed whitespace-pre-line font-sans">
-              {activeProfile.bio}
+              {activeProfile.bio
+                .split(/(\*\*[^*]+\*\*)/)
+                .map((segment: string, i: number) => {
+                  if (segment.startsWith('**') && segment.endsWith('**')) {
+                    return (
+                      <strong key={i} className="text-white font-semibold">
+                        {segment.slice(2, -2)}
+                      </strong>
+                    )
+                  }
+                  return segment
+                })}
             </p>
 
             {/* Statistics */}

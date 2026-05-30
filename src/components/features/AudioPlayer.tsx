@@ -175,7 +175,7 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
         onEnded={handleAudioEnded}
       />
 
-      <div className="lg:col-span-1 space-y-4 max-h-[350px] overflow-y-auto pr-2">
+      <div className="lg:col-span-1 order-2 lg:order-1 space-y-4 max-h-[350px] overflow-y-auto pr-2">
         <h3 className="text-xs uppercase tracking-wider font-semibold text-neutral-400">
           Playlist Showcase
         </h3>
@@ -213,7 +213,7 @@ export const AudioPlayer = ({ tracks }: AudioPlayerProps) => {
         </div>
       </div>
 
-      <div className="lg:col-span-2 flex flex-col justify-between space-y-6 lg:pl-6 lg:border-l border-neutral-800/40">
+      <div className="lg:col-span-2 order-1 lg:order-2 flex flex-col justify-between space-y-6 lg:pl-6 lg:border-l border-neutral-800/40">
         <div>
           <span className="text-[10px] uppercase tracking-wider font-bold text-gold px-2 py-0.5 bg-gold/10 border border-gold/20 rounded-md">
             Currently Playing

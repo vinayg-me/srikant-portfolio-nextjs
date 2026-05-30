@@ -27,43 +27,43 @@ export const AboutTabs = ({ skills, experience, education }: AboutTabsProps) => 
   return (
     <div className="space-y-6">
       {/* Tabs selectors */}
-      <div className="flex border-b border-neutral-800/80">
+      <div className="flex border-b border-neutral-800/80 overflow-x-auto scrollbar-none w-full">
         <button
           onClick={() => setActiveTab('skills')}
           className={cn(
-            "flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 cursor-pointer",
+            "flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 border-b-2 text-xs md:text-sm font-semibold whitespace-nowrap shrink-0 transition-all duration-300 cursor-pointer flex-1 md:flex-none",
             activeTab === 'skills'
               ? "border-teal text-teal"
               : "border-transparent text-neutral-400 hover:text-neutral-200"
           )}
         >
-          <Cpu className="w-4 h-4" />
+          <Cpu className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
           Skills & DAWs
         </button>
 
         <button
           onClick={() => setActiveTab('experience')}
           className={cn(
-            "flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 cursor-pointer",
+            "flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 border-b-2 text-xs md:text-sm font-semibold whitespace-nowrap shrink-0 transition-all duration-300 cursor-pointer flex-1 md:flex-none",
             activeTab === 'experience'
               ? "border-teal text-teal"
               : "border-transparent text-neutral-400 hover:text-neutral-200"
           )}
         >
-          <Briefcase className="w-4 h-4" />
+          <Briefcase className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
           Experience
         </button>
 
         <button
           onClick={() => setActiveTab('education')}
           className={cn(
-            "flex items-center gap-2 px-5 py-3 border-b-2 text-sm font-semibold transition-all duration-300 cursor-pointer",
+            "flex items-center justify-center gap-1.5 md:gap-2 px-3 md:px-5 py-2.5 md:py-3 border-b-2 text-xs md:text-sm font-semibold whitespace-nowrap shrink-0 transition-all duration-300 cursor-pointer flex-1 md:flex-none",
             activeTab === 'education'
               ? "border-teal text-teal"
               : "border-transparent text-neutral-400 hover:text-neutral-200"
           )}
         >
-          <Award className="w-4 h-4" />
+          <Award className="w-3.5 h-3.5 md:w-4 md:h-4 shrink-0" />
           Education
         </button>
       </div>

@@ -40,17 +40,18 @@ export default async function Home() {
     <div className="flex flex-col min-h-screen">
       {/* Header / Navigation bar */}
       <header className="sticky top-0 z-50 w-full bg-neutral-950/80 backdrop-blur-md border-b border-neutral-900/60">
-        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-          <a href="#" className="flex items-center gap-3 font-serif text-xl md:text-2xl font-bold tracking-wider text-white group">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between relative">
+          <a href="#" className="flex items-center gap-2.5 font-serif text-lg md:text-2xl font-bold tracking-wider text-white group">
             <img
               src="/Srikant-Logo.jpg"
               alt="Srikant Krishna Logo"
               className="h-10 w-10 md:h-12 md:w-12 object-contain rounded-lg border border-neutral-800 bg-neutral-900/50 p-0.5 group-hover:border-gold/50 transition-colors duration-300"
             />
-            <span className="leading-none select-none">
+            <span className="leading-none select-none hidden min-[460px]:inline">
               SRIKANT <span className="text-gold">KRISHNA</span>
             </span>
           </a>
+          
           <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-neutral-400">
             <a href="#about" className="hover:text-gold transition">Bio</a>
             <a href="#services" className="hover:text-gold transition">Services</a>
@@ -59,12 +60,36 @@ export default async function Home() {
             <a href="#testimonials" className="hover:text-gold transition">Testimonials</a>
             <a href="#contact" className="hover:text-gold transition">Collaborate</a>
           </nav>
-          <a
-            href="#contact"
-            className="px-5 py-2.5 bg-neutral-900 border border-neutral-800 hover:border-gold hover:text-gold rounded-full text-xs font-bold uppercase tracking-wider text-neutral-300 transition-all duration-300"
-          >
-            Get In Touch
-          </a>
+          
+          <div className="flex items-center gap-3">
+            <a
+              href="#contact"
+              className="px-4 py-2 md:px-5 md:py-2.5 bg-neutral-900 border border-neutral-800 hover:border-gold hover:text-gold rounded-full text-[10px] md:text-xs font-bold uppercase tracking-wider text-neutral-300 transition-all duration-300"
+            >
+              Get In Touch
+            </a>
+
+            {/* CSS Checkbox Hack for Mobile Menu Toggle */}
+            <input type="checkbox" id="mobile-menu-toggle" className="hidden peer" />
+            <label
+              htmlFor="mobile-menu-toggle"
+              className="md:hidden p-2 text-neutral-400 hover:text-white cursor-pointer select-none relative z-50 flex items-center justify-center rounded-lg border border-neutral-900/60 bg-neutral-950/40"
+            >
+              <svg className="w-5 h-5 fill-current transition-transform duration-300 peer-checked:rotate-90" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 5h14a1 1 0 100-2H3a1 1 0 100 2zm0 6h14a1 1 0 100-2H3a1 1 0 100 2zm0 6h14a1 1 0 100-2H3a1 1 0 100 2z" />
+              </svg>
+            </label>
+
+            {/* Mobile Navigation Dropdown Menu */}
+            <div className="absolute top-20 left-0 w-full bg-neutral-950/95 backdrop-blur-md border-b border-neutral-900 hidden peer-checked:flex flex-col items-center py-6 gap-5 text-sm font-semibold tracking-wider text-neutral-300 animate-in fade-in slide-in-from-top-5 duration-200 shadow-xl z-40">
+              <a href="#about" className="hover:text-gold transition py-1 w-full text-center">Bio</a>
+              <a href="#services" className="hover:text-gold transition py-1 w-full text-center">Services</a>
+              <a href="#credits" className="hover:text-gold transition py-1 w-full text-center">Credits</a>
+              <a href="#music" className="hover:text-gold transition py-1 w-full text-center">Showcase</a>
+              <a href="#testimonials" className="hover:text-gold transition py-1 w-full text-center">Testimonials</a>
+              <a href="#contact" className="hover:text-gold transition py-1 w-full text-center">Collaborate</a>
+            </div>
+          </div>
         </div>
       </header>
 
@@ -270,7 +295,7 @@ export default async function Home() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((t: any) => {
               const avatarUrl = t.avatar ? urlFor(t.avatar).width(120).url() : null
 
